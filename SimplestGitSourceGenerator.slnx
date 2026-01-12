@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Src/">
+    <Project Path="Src/SimplestGitSourceGenerator/SimplestGitSourceGenerator.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/SimplestGitSourceGenerator.Tests/SimplestGitSourceGenerator.Tests.csproj" Id="f7bdc9a8-c58e-4f48-a006-85676880ffbc" />
+  </Folder>
+</Solution>

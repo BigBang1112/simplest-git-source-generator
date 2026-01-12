@@ -1,0 +1,30 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <Target Name="GetGitMetadata" BeforeTargets="InitializeSourceControlInformation;BeforeBuild">
+
+        <Exec Command="git rev-parse HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low">
+            <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitCommitHash" />
+        </Exec>
+
+        <Exec Command="git rev-parse --abbrev-ref HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low">
+            <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitBranch" />
+        </Exec>
+
+        <Exec Command="git log -1 --format=%%cI" ConsoleToMSBuild="true" StandardOutputImportance="low">
+            <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitCommitDate" />
+        </Exec>
+
+        <Exec Command="git describe --tags" ConsoleToMSBuild="true" StandardOutputImportance="low">
+            <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitTag" />
+        </Exec>
+
+    </Target>
+
+    <ItemGroup>
+        <CompilerVisibleProperty Include="SimplestGitCommitHash" />
+        <CompilerVisibleProperty Include="SimplestGitBranch" />
+        <CompilerVisibleProperty Include="SimplestGitCommitDate" />
+        <CompilerVisibleProperty Include="SimplestGitTag" />
+    </ItemGroup>
+
+</Project>
