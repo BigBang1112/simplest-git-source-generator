@@ -1,4 +1,5 @@
 <Solution>
+  <Folder Name="/Samples/" />
   <Folder Name="/Src/">
     <Project Path="Src/SimplestGitSourceGenerator/SimplestGitSourceGenerator.csproj" />
   </Folder>

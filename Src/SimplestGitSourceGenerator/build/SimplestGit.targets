@@ -2,19 +2,19 @@
 
     <Target Name="GetGitMetadata" BeforeTargets="InitializeSourceControlInformation;BeforeBuild">
 
-        <Exec Command="git rev-parse HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low">
+        <Exec Command="git rev-parse HEAD" ConsoleToMSBuild="true" StandardOutputImportance="Low">
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitCommitHash" />
         </Exec>
 
-        <Exec Command="git rev-parse --abbrev-ref HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low">
+        <Exec Command="git rev-parse --abbrev-ref HEAD" ConsoleToMSBuild="true" StandardOutputImportance="Low">
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitBranch" />
         </Exec>
 
-        <Exec Command="git log -1 --format=%%cI" ConsoleToMSBuild="true" StandardOutputImportance="low">
+        <Exec Command="git log -1 --format=%%cI" ConsoleToMSBuild="true" StandardOutputImportance="Low">
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitCommitDate" />
         </Exec>
 
-        <Exec Command="git describe --tags" ConsoleToMSBuild="true" StandardOutputImportance="low">
+        <Exec Command="git describe --tags --always" ConsoleToMSBuild="true" StandardOutputImportance="Low">
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitTag" />
         </Exec>
 
