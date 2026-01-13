@@ -15,13 +15,15 @@ public class GitInfoGenerator : IIncrementalGenerator
                 options.GlobalOptions.TryGetValue("build_property.SimplestGitBranch", out var branch);
                 options.GlobalOptions.TryGetValue("build_property.SimplestGitCommitDate", out var commitDate);
                 options.GlobalOptions.TryGetValue("build_property.SimplestGitTag", out var tag);
+                options.GlobalOptions.TryGetValue("build_property.SimplestGitRemoteUrl", out var remoteUrl);
 
                 return new GitInfo
                 {
                     CommitHash = hash,
                     Branch = branch,
                     CommitDate = commitDate,
-                    Tag = tag
+                    Tag = tag,
+                    RemoteUrl = remoteUrl
                 };
             });
 
@@ -36,6 +38,7 @@ internal static class SimplestGit
     public const string Branch = {EscapeStringLiteral(info.Branch)};
     public const string CommitDate = {EscapeStringLiteral(info.CommitDate)};
     public const string Tag = {EscapeStringLiteral(info.Tag)};
+    public const string RemoteUrl = {EscapeStringLiteral(info.RemoteUrl)};
 }}";
             spc.AddSource("GitInfo", source);
         });
@@ -57,5 +60,6 @@ internal static class SimplestGit
         public string? Branch { get; set; }
         public string? CommitDate { get; set; }
         public string? Tag { get; set; }
+        public string? RemoteUrl { get; set; }
     }
 }

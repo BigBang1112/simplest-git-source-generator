@@ -22,6 +22,10 @@
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitTag" />
         </Exec>
 
+        <Exec Command="git ls-remote --get-url" ConsoleToMSBuild="true" StandardOutputImportance="Low" StandardErrorImportance="Low" IgnoreExitCode="true">
+            <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitRemoteUrl" />
+        </Exec>
+
     </Target>
 
     <ItemGroup>
@@ -29,6 +33,7 @@
         <CompilerVisibleProperty Include="SimplestGitBranch" />
         <CompilerVisibleProperty Include="SimplestGitCommitDate" />
         <CompilerVisibleProperty Include="SimplestGitTag" />
+        <CompilerVisibleProperty Include="SimplestGitRemoteUrl" />
     </ItemGroup>
 
 </Project>
