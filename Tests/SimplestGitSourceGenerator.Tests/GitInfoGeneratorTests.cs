@@ -9,5 +9,6 @@ public class GitInfoGeneratorTests
         Assert.NotEmpty(SimplestGit.CommitDate);
         Assert.NotEmpty(SimplestGit.Branch);
         Assert.NotEmpty(SimplestGit.Tag);
+        Assert.NotEmpty(SimplestGit.RemoteUrl);
     }
 }

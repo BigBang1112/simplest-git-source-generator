@@ -22,7 +22,7 @@
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitTag" />
         </Exec>
 
-        <Exec Command="git ls-remote --get-url" ConsoleToMSBuild="true" StandardOutputImportance="Low" StandardErrorImportance="Low" IgnoreExitCode="true">
+        <Exec Command="git ls-remote --get-url" ConsoleToMSBuild="true" StandardOutputImportance="Low" Condition="'$(PublishRepositoryUrl)' == 'true'">
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitRemoteUrl" />
         </Exec>
 
