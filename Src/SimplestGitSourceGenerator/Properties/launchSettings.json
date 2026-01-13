@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SimplestGitSourceGenerator": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\..\\Samples\\SimplestGitConsoleApp\\SimplestGitConsoleApp.csproj"
+    }
+  }
+}

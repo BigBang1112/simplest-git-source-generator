@@ -1,5 +1,7 @@
 <Solution>
-  <Folder Name="/Samples/" />
+  <Folder Name="/Samples/">
+    <Project Path="Samples/SimplestGitConsoleApp/SimplestGitConsoleApp.csproj" Id="5a3511a5-4560-4a6b-adab-3a9b2b8f0cbe" />
+  </Folder>
   <Folder Name="/Src/">
     <Project Path="Src/SimplestGitSourceGenerator/SimplestGitSourceGenerator.csproj" />
   </Folder>

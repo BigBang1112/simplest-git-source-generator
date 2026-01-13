@@ -45,7 +45,7 @@ internal static class SimplestGit
     {
         if (value is null)
         {
-            return "null";
+            return "\"\"";
         }
 
         return SymbolDisplay.FormatLiteral(value, quote: true);
