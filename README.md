@@ -34,7 +34,7 @@ Ensure that you remove `.git` folders from your `.dockerignore` file and that yo
 
 Make sure to install `git` before building your project (Alpine example):
 
-```
+```dockerfile
 RUN apk add --no-cache git
 ```
 
