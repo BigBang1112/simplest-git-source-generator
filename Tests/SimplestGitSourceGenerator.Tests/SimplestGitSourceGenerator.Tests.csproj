@@ -14,7 +14,7 @@
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
     </ItemGroup>
 
-    <Import Project="..\..\Src\SimplestGitSourceGenerator\build\SimplestGit.targets" />
+    <Import Project="..\..\Src\SimplestGitSourceGenerator\build\SimplestGitSourceGenerator.targets" />
 
     <ItemGroup>
         <ProjectReference Include="..\..\Src\SimplestGitSourceGenerator\SimplestGitSourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

@@ -9,7 +9,7 @@
         <DockerfileContext>..\..</DockerfileContext>
     </PropertyGroup>
 
-    <Import Project="..\..\Src\SimplestGitSourceGenerator\build\SimplestGit.targets" />
+    <Import Project="..\..\Src\SimplestGitSourceGenerator\build\SimplestGitSourceGenerator.targets" />
 
     <ItemGroup>
       <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
