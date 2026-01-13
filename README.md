@@ -47,4 +47,4 @@ Before the source generator kicks in, several Git commands are called and stored
 - `SimplestGitCommitDate` - `git log -1 --format=%cI`
 - `SimplestGitTag` - `git describe --tags --always`
 
-These commands must complete with the exit code 0, otherwise, the build will not pass. All of that is done thanks to the `build/SimplestGit.targets` file.
+These commands must complete with the exit code 0, otherwise, the build will not pass. All of that is done thanks to the `build/SimplestGitSourceGenerator.targets` file.
