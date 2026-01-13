@@ -46,8 +46,7 @@
 
     <ItemGroup>
         <None Include="../../README.md" Pack="true" PackagePath="\" />
-        <None Include="buildTransitive\SimplestGitSourceGenerator.targets" Pack="true" PackagePath="buildTransitive\SimplestGitSourceGenerator.targets" />
-        <None Include="buildTransitive\SimplestGitSourceGenerator.targets" Pack="true" PackagePath="build\SimplestGitSourceGenerator.targets" />
+        <None Include="build\SimplestGitSourceGenerator.targets" Pack="true" PackagePath="build\" />
     </ItemGroup>
 
 </Project>
