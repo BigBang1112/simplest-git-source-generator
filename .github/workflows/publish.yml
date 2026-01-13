@@ -66,13 +66,13 @@ jobs:
         name: build
         
     - name: Publish SimplestGitSourceGenerator package to nuget.org
-      run: dotnet nuget push Src/SimplestGitSourceGenerator/bin/Release/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate
 
     - name: Publish SimplestGitSourceGenerator nupkg to github.com
-      run: dotnet nuget push Src/SimplestGitSourceGenerator/bin/Release/*.nupkg -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/bigbang1112/index.json --skip-duplicate
+      run: dotnet nuget push *.nupkg -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/bigbang1112/index.json --skip-duplicate
     
     - name: Upload SimplestGitSourceGenerator nupkg to this release
-      run: gh release upload ${{ github.ref_name }} Src/SimplestGitSourceGenerator/bin/Release/*.nupkg
+      run: gh release upload ${{ github.ref_name }} *.nupkg
 
   finalize-description:
     needs: publish
