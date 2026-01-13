@@ -1,6 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <PackageId>SimplestGitSourceGenerator</PackageId>
+        <Authors>BigBang1112</Authors>
+        <Description>Simplest solution to get Git information in your .NET apps.</Description>
+        <Copyright>Copyright (c) 2026 Petr Pivoňka</Copyright>
+        <PackageProjectUrl>https://github.com/BigBang1112/simplest-git-source-generator</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>git;source-generator;roslyn;dotnet;csharp;build;commit;branch;version;metadata;msbuild</PackageTags>
+        <PackageReleaseNotes></PackageReleaseNotes>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -13,12 +25,26 @@
         <IncludeBuildOutput>false</IncludeBuildOutput>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" PrivateAssets="all" />
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
     </ItemGroup>
+
+    <ItemGroup>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
     
     <ItemGroup>
+        <None Include="../../README.md" Pack="true" PackagePath="\" />
         <None Include="build\SimplestGit.targets" Pack="true" PackagePath="build\" />
     </ItemGroup>
 
