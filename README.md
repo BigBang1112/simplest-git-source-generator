@@ -1,5 +1,8 @@
 # SimplestGitSourceGenerator
 
+[![Nuget](https://img.shields.io/nuget/v/TmEssentials?style=for-the-badge&logo=nuget)](https://www.nuget.org/packages/SimplestGitSourceGenerator/)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/BigBang1112/simplest-git-source-generator?include_prereleases&style=for-the-badge&logo=github)](https://github.com/BigBang1112/simplest-git-source-generator/releases)
+
 Happy to showcase the simplest solution for retrieving Git information in your .NET apps.
 
 ## Requirements
