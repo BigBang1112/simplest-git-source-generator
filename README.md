@@ -7,7 +7,7 @@ Happy to showcase the simplest solution for retrieving Git information in your .
 
 ## Requirements
 
-- Project must be a Git repository
+- Project must be a Git repository with at least 1 commit
 - Git must be installed
 
 If these requirements are not fulfilled, the build will not pass!
@@ -31,6 +31,16 @@ Console.WriteLine(SimplestGit.Branch);
 Console.WriteLine(SimplestGit.Tag);
 ```
 
+If you want to include remote URL as well, you can enable it via property:
+
+```xml
+<PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+</PropertyGroup>
+```
+
+Once that's done, you can access it via `SimplestGit.RemoteUrl`.
+
 ### Docker build
 
 Ensure that you remove `.git` folders from your `.dockerignore` file and that you multi-stage your build so that the `.git` folder is not included in the final image.
@@ -45,9 +55,12 @@ RUN apk add --no-cache git
 
 Before the source generator kicks in, several Git commands are called and stored as compiler properties before they are baked into the code.
 
-- `SimplestGitCommitHash` - `git rev-parse HEAD`
-- `SimplestGitBranch` - `git rev-parse --abbrev-ref HEAD`
-- `SimplestGitCommitDate` - `git log -1 --format=%cI`
-- `SimplestGitTag` - `git describe --tags --always`
+- `git rev-parse HEAD` (`SimplestGitCommitHash`)
+- `git rev-parse --abbrev-ref HEAD` (`SimplestGitBranch`)
+- `git log -1 --format=%cI` (`SimplestGitCommitDate`)
+- `git describe --tags --always` (`SimplestGitTag`)
+- `git ls-remote --get-url` (`SimplestGitRemoteUrl`)
 
 These commands must complete with the exit code 0, otherwise, the build will not pass. All of that is done thanks to the `build/SimplestGitSourceGenerator.targets` file.
+
+This is a simpler alternative to SourceLink or GitInfo packages if you don't mind requiring the Git dependency.
