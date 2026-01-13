@@ -3,6 +3,7 @@
     <PropertyGroup>
         <PackageId>SimplestGitSourceGenerator</PackageId>
         <Authors>BigBang1112</Authors>
+        <Version>1.0.1</Version>
         <Description>Simplest solution to get Git information in your .NET apps.</Description>
         <Copyright>Copyright (c) 2026 Petr Pivoňka</Copyright>
         <PackageProjectUrl>https://github.com/BigBang1112/simplest-git-source-generator</PackageProjectUrl>
@@ -23,6 +24,7 @@
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <IsRoslynComponent>true</IsRoslynComponent>
         <IncludeBuildOutput>false</IncludeBuildOutput>
+        <DevelopmentDependency>true</DevelopmentDependency>
     </PropertyGroup>
 
     <PropertyGroup>
