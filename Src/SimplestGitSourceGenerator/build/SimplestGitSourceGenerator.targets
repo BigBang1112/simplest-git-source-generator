@@ -2,27 +2,27 @@
 
     <Target Name="GetGitMetadata" BeforeTargets="InitializeSourceControlInformation;BeforeBuild">
 
-        <Exec Command="git rev-parse HEAD" ConsoleToMSBuild="true" StandardOutputImportance="Low">
+        <Exec Command="git rev-parse HEAD" ConsoleToMSBuild="true" StandardOutputImportance="Low" WorkingDirectory="$(MSBuildProjectDirectory)">
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitCommitHash" />
         </Exec>
 
-        <Exec Command="git rev-parse --abbrev-ref HEAD" ConsoleToMSBuild="true" StandardOutputImportance="Low">
+        <Exec Command="git rev-parse --abbrev-ref HEAD" ConsoleToMSBuild="true" StandardOutputImportance="Low" WorkingDirectory="$(MSBuildProjectDirectory)">
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitBranch" />
         </Exec>
 
-        <Exec Command="git log -1 --format=%%cI" ConsoleToMSBuild="true" StandardOutputImportance="Low" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+        <Exec Command="git log -1 --format=%%cI" ConsoleToMSBuild="true" StandardOutputImportance="Low" Condition="$([MSBuild]::IsOSPlatform('Windows'))" WorkingDirectory="$(MSBuildProjectDirectory)">
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitCommitDate" />
         </Exec>
 
-        <Exec Command="git log -1 --format=%cI" ConsoleToMSBuild="true" StandardOutputImportance="Low" Condition="!$([MSBuild]::IsOSPlatform('Windows'))">
+        <Exec Command="git log -1 --format=%cI" ConsoleToMSBuild="true" StandardOutputImportance="Low" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" WorkingDirectory="$(MSBuildProjectDirectory)">
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitCommitDate" />
         </Exec>
 
-        <Exec Command="git describe --tags --always" ConsoleToMSBuild="true" StandardOutputImportance="Low">
+        <Exec Command="git describe --tags --always" ConsoleToMSBuild="true" StandardOutputImportance="Low" WorkingDirectory="$(MSBuildProjectDirectory)">
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitTag" />
         </Exec>
 
-        <Exec Command="git ls-remote --get-url" ConsoleToMSBuild="true" StandardOutputImportance="Low" Condition="'$(PublishRepositoryUrl)' == 'true'">
+        <Exec Command="git ls-remote --get-url" ConsoleToMSBuild="true" StandardOutputImportance="Low" Condition="'$(PublishRepositoryUrl)' == 'true'" WorkingDirectory="$(MSBuildProjectDirectory)">
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitRemoteUrl" />
         </Exec>
 
