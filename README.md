@@ -59,7 +59,7 @@ Before the source generator kicks in, several Git commands are called and stored
 - `git rev-parse --abbrev-ref HEAD` (`SimplestGitBranch`)
 - `git log -1 --format=%cI` (`SimplestGitCommitDate`)
 - `git describe --tags --always` (`SimplestGitTag`)
-- `git ls-remote --get-url` (`SimplestGitRemoteUrl`)
+- `git ls-remote --get-url` (`SimplestGitRemoteUrl`) + credentials are automatically stripped from the URL
 
 These commands must complete with the exit code 0, otherwise, the build will not pass. All of that is done thanks to the `build/SimplestGitSourceGenerator.targets` file.
 
