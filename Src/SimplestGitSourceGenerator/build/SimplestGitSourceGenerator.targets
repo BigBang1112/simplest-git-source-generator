@@ -22,12 +22,12 @@
             <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitTag" />
         </Exec>
 
-        <PropertyGroup Condition="'$(PublishRepositoryUrl)' == 'true'">
-            <Exec Command="git ls-remote --get-url" ConsoleToMSBuild="true" StandardOutputImportance="Low" WorkingDirectory="$(MSBuildProjectDirectory)">
-                <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitRemoteUrl" />
-            </Exec>
+        <Exec Command="git ls-remote --get-url" ConsoleToMSBuild="true" StandardOutputImportance="Low" Condition="'$(PublishRepositoryUrl)' == 'true'" WorkingDirectory="$(MSBuildProjectDirectory)">
+            <Output TaskParameter="ConsoleOutput" PropertyName="SimplestGitRemoteUrl" />
+        </Exec>
 
-            <!-- Strip token authentication from the remote URL before it is passed to the compiler -->
+        <!-- Strip token authentication from the remote URL before it is passed to the compiler -->
+        <PropertyGroup Condition="'$(PublishRepositoryUrl)' == 'true'">
             <SimplestGitRemoteUrl>$([System.Text.RegularExpressions.Regex]::Replace($(SimplestGitRemoteUrl), '(:\/\/)[^/]+@', '$1'))</SimplestGitRemoteUrl>
         </PropertyGroup>
 
