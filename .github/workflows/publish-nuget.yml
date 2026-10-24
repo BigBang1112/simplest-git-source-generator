@@ -19,5 +19,6 @@ jobs:
       test-path: Tests/SimplestGitSourceGenerator.Tests/SimplestGitSourceGenerator.Tests.csproj
       pack-path: Src/SimplestGitSourceGenerator/SimplestGitSourceGenerator.csproj
       main-project: SimplestGitSourceGenerator
+      release-all-packages: true
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
