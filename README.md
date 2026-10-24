@@ -41,6 +41,22 @@ If you want to include remote URL as well, you can enable it via property:
 
 Once that's done, you can access it via `SimplestGit.RemoteUrl`.
 
+The repository must have a default remote when this option is enabled. When the option is disabled, `RemoteUrl` is an empty string and no remote lookup is performed.
+
+### Metadata behavior
+
+The generated `SimplestGit` class is internal to the consuming assembly and exposes constant strings:
+
+| Property | Value |
+| --- | --- |
+| `CommitHash` | Full hash of `HEAD`. |
+| `Branch` | Branch name, or `HEAD` for a detached checkout. |
+| `CommitDate` | Committer date, not author date, in ISO 8601 format with a time zone offset. |
+| `Tag` | An exact tag, a value such as `v1.2.3-2-gabcdef0`, or an abbreviated commit hash if no reachable tag exists. |
+| `RemoteUrl` | Default remote URL when enabled, with URL user information stripped, otherwise an empty string. |
+
+Shallow clones or checkouts without tags can produce a different `Tag` value from a full clone.
+
 ### Docker build
 
 Ensure that you remove `.git` folders from your `.dockerignore` file and that you multi-stage your build so that the `.git` folder is not included in the final image.
