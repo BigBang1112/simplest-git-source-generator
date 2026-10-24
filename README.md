@@ -57,6 +57,22 @@ The generated `SimplestGit` class is internal to the consuming assembly and expo
 
 Shallow clones or checkouts without tags can produce a different `Tag` value from a full clone.
 
+### Choosing the repository
+
+By default, you get Git information from the repository containing your project. If your project is in a submodule, you get the submodule's information, not the main repository's.
+
+To use a different repository, set `SimplestGitWorkingDirectory`:
+
+```xml
+<PropertyGroup>
+    <SimplestGitWorkingDirectory>$(MSBuildProjectDirectory)\..\..</SimplestGitWorkingDirectory>
+</PropertyGroup>
+```
+
+Change the path to point to the repository you want. Relative paths start from your project's folder. Absolute paths work too.
+
+Leave this setting out or empty to keep the default. The selected repository must be available during the build, or the build will fail.
+
 ### Docker build
 
 Ensure that you remove `.git` folders from your `.dockerignore` file and that you multi-stage your build so that the `.git` folder is not included in the final image.

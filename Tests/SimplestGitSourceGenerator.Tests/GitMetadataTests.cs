@@ -64,6 +64,88 @@ public sealed class GitMetadataTests : IDisposable
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
+    public void Metadata_ProjectInsideSubmodule_UsesSubmoduleRatherThanParent(bool detachedHead)
+    {
+        InitializeRepository();
+        Git("remote", "add", "origin", "https://example.invalid/parent.git");
+
+        var sourceDirectory = Path.Combine(directory, "SubmoduleSource");
+        var relativeProjectPath = Path.Combine("src", "Library", "Metadata.proj");
+        Git("init", "--initial-branch=library", sourceDirectory);
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(sourceDirectory, relativeProjectPath))!);
+        File.Copy(Path.Combine(directory, "Metadata.proj"), Path.Combine(sourceDirectory, relativeProjectPath));
+        Git("-C", sourceDirectory, "add", relativeProjectPath);
+        Commit(sourceDirectory);
+        Git("-C", sourceDirectory, "-c", "tag.gpgSign=false", "tag", "library-v1.2.3");
+        var submoduleHash = Git("-C", sourceDirectory, "rev-parse", "HEAD");
+
+        var relativeSubmodulePath = Path.Combine("modules", "Library Module");
+        var submoduleDirectory = Path.Combine(directory, relativeSubmodulePath);
+        Git("-c", "protocol.file.allow=always", "submodule", "add", sourceDirectory, relativeSubmodulePath);
+        Git("-C", submoduleDirectory, "remote", "set-url", "origin", "https://example.invalid/library.git");
+        if (detachedHead)
+        {
+            Git("-C", submoduleDirectory, "checkout", "--detach", "HEAD");
+        }
+
+        Git("add", "Metadata.proj");
+        Commit();
+        Git("-c", "tag.gpgSign=false", "tag", "parent-v9.0.0");
+        Assert.True(File.Exists(Path.Combine(submoduleDirectory, ".git")));
+
+        var parentMetadata = ReadMetadata(publishRepositoryUrl: true);
+        var submoduleMetadata = ReadMetadata(
+            publishRepositoryUrl: true,
+            projectPath: Path.Combine(submoduleDirectory, relativeProjectPath));
+
+        Assert.Equal(Git("rev-parse", "HEAD"), parentMetadata["SimplestGitCommitHash"]);
+        Assert.Equal("main", parentMetadata["SimplestGitBranch"]);
+        Assert.Equal("parent-v9.0.0", parentMetadata["SimplestGitTag"]);
+        Assert.Equal("https://example.invalid/parent.git", parentMetadata["SimplestGitRemoteUrl"]);
+
+        Assert.Equal(submoduleHash, submoduleMetadata["SimplestGitCommitHash"]);
+        Assert.Equal(detachedHead ? "HEAD" : "library", submoduleMetadata["SimplestGitBranch"]);
+        Assert.Equal(CommitDate, submoduleMetadata["SimplestGitCommitDate"]);
+        Assert.Equal("library-v1.2.3", submoduleMetadata["SimplestGitTag"]);
+        Assert.Equal("https://example.invalid/library.git", submoduleMetadata["SimplestGitRemoteUrl"]);
+        foreach (var property in new[] { "SimplestGitCommitHash", "SimplestGitBranch", "SimplestGitTag", "SimplestGitRemoteUrl" })
+        {
+            Assert.NotEqual(parentMetadata[property], submoduleMetadata[property]);
+        }
+
+        var submoduleProjectPath = Path.Combine(submoduleDirectory, relativeProjectPath);
+        foreach (var workingDirectory in new[]
+        {
+            directory,
+            Path.GetRelativePath(Path.GetDirectoryName(submoduleProjectPath)!, directory)
+        })
+        {
+            var overriddenMetadata = ReadMetadata(
+                publishRepositoryUrl: true,
+                projectPath: submoduleProjectPath,
+                workingDirectory: workingDirectory);
+
+            Assert.Equal(
+                parentMetadata.OrderBy(pair => pair.Key),
+                overriddenMetadata.OrderBy(pair => pair.Key));
+        }
+    }
+
+    [Fact]
+    public void Metadata_FailsForMissingWorkingDirectoryOverride_WithoutFallingBackToProjectDirectory()
+    {
+        InitializeRepository();
+        var result = Run(
+            "dotnet", "msbuild", "Metadata.proj", "-target:GetGitMetadata", "-nologo", "-verbosity:quiet",
+            "-property:SimplestGitWorkingDirectory=" + Path.Combine(directory, "Missing Directory"));
+
+        Assert.NotEqual(0, result.ExitCode);
+        Assert.Contains("MSB", result.Output + result.Error);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
     public void Metadata_FailsOutsideRepositoryOrWithoutCommits(bool initializeRepository)
     {
         if (initializeRepository)
@@ -93,17 +175,22 @@ public sealed class GitMetadataTests : IDisposable
         Commit();
     }
 
-    private void Commit() => Git(
+    private void Commit(string? repositoryDirectory = null) => Git(
+        "-C", repositoryDirectory ?? directory,
         "-c", "user.name=Generator Tests",
         "-c", "user.email=generator-tests@example.invalid",
         "-c", "core.hooksPath=" + Path.Combine(directory, "no-hooks"),
         "commit", "--allow-empty", "--no-gpg-sign", "-m", "Test commit");
 
-    private Dictionary<string, string> ReadMetadata(bool publishRepositoryUrl = false)
+    private Dictionary<string, string> ReadMetadata(
+        bool publishRepositoryUrl = false,
+        string projectPath = "Metadata.proj",
+        string? workingDirectory = null)
     {
         var result = Run(
-            "dotnet", "msbuild", "Metadata.proj", "-target:GetGitMetadata", "-nologo", "-verbosity:quiet",
+            "dotnet", "msbuild", projectPath, "-target:GetGitMetadata", "-nologo", "-verbosity:quiet",
             "-property:PublishRepositoryUrl=" + publishRepositoryUrl.ToString().ToLowerInvariant(),
+            "-property:SimplestGitWorkingDirectory=" + workingDirectory,
             "-getProperty:SimplestGitCommitHash,SimplestGitBranch,SimplestGitCommitDate,SimplestGitTag,SimplestGitRemoteUrl");
         Assert.True(result.ExitCode == 0, result.Output + result.Error);
 
