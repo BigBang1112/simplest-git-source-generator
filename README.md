@@ -2,6 +2,7 @@
 
 [![Nuget](https://img.shields.io/nuget/v/SimplestGitSourceGenerator?style=for-the-badge&logo=nuget)](https://www.nuget.org/packages/SimplestGitSourceGenerator/)
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/BigBang1112/simplest-git-source-generator?include_prereleases&style=for-the-badge&logo=github)](https://github.com/BigBang1112/simplest-git-source-generator/releases)
+[![Code coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen?style=for-the-badge)](https://github.com/BigBang1112/simplest-git-source-generator/actions/workflows/dotnet-ci.yml)
 
 Happy to showcase the simplest solution for retrieving Git information in your .NET apps.
 
