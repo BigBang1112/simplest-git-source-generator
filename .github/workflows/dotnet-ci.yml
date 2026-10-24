@@ -20,4 +20,3 @@ jobs:
     uses: bigbang1112/workflows/.github/workflows/dotnet-ci.yml@main
     with:
       dotnet-version: 10.0.x
-      enable-coverage: true

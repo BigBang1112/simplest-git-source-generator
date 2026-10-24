@@ -13,7 +13,6 @@ jobs:
     uses: bigbang1112/workflows/.github/workflows/publish-nuget-immutable.yml@main
     with:
       dotnet-version: 10.0.x
-      enable-coverage: true
       project-path: |
         Src/SimplestGitSourceGenerator/SimplestGitSourceGenerator.csproj
         Tests/SimplestGitSourceGenerator.Tests/SimplestGitSourceGenerator.Tests.csproj
