@@ -97,6 +97,20 @@ These commands must complete with the exit code 0, otherwise, the build will not
 
 This is a simpler alternative to SourceLink or GitInfo packages if you don't mind requiring the Git dependency.
 
+## Running tests
+
+Tests use TUnit and require the .NET 10 SDK. From the repository root, run:
+
+```sh
+dotnet test
+```
+
+To include code coverage:
+
+```sh
+dotnet test --coverage --coverage-output-format cobertura
+```
+
 ## CI and releases
 
 Pull requests and pushes to `main` build and test the solution on Windows and Linux, and build and run the Docker sample.

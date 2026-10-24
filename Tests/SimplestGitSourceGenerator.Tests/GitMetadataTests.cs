@@ -1,9 +1,11 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Text.Json;
 using System.Xml.Linq;
 
 namespace SimplestGitSourceGenerator.Tests;
 
+[NotInParallel(nameof(GitMetadataTests))]
 public sealed class GitMetadataTests : IDisposable
 {
     private const string CommitDate = "2026-01-02T03:04:05+00:00";
@@ -19,8 +21,10 @@ public sealed class GitMetadataTests : IDisposable
             .Save(Path.Combine(directory, "Metadata.proj"));
     }
 
-    [Fact]
-    public void Metadata_MatchesTaggedCommit_AndStripsRemoteCredentials()
+    [Test]
+    [Arguments(CommitDate)]
+    [Arguments("2026-01-02T03:04:05Z")]
+    public async Task Metadata_MatchesTaggedCommit_AndStripsRemoteCredentials(string expectedCommitDate)
     {
         InitializeRepository();
         Git("tag", "v1.2.3");
@@ -28,27 +32,28 @@ public sealed class GitMetadataTests : IDisposable
 
         var metadata = ReadMetadata(publishRepositoryUrl: true);
 
-        Assert.Equal(Git("rev-parse", "HEAD"), metadata["SimplestGitCommitHash"]);
-        Assert.Equal("main", metadata["SimplestGitBranch"]);
-        Assert.Equal(CommitDate, metadata["SimplestGitCommitDate"]);
-        Assert.Equal("v1.2.3", metadata["SimplestGitTag"]);
-        Assert.Equal("https://example.invalid/repo.git", metadata["SimplestGitRemoteUrl"]);
+        await Assert.That(metadata["SimplestGitCommitHash"]).IsEqualTo(Git("rev-parse", "HEAD"));
+        await Assert.That(metadata["SimplestGitBranch"]).IsEqualTo("main");
+        await Assert.That(DateTimeOffset.Parse(metadata["SimplestGitCommitDate"], CultureInfo.InvariantCulture))
+            .IsEqualTo(DateTimeOffset.Parse(expectedCommitDate, CultureInfo.InvariantCulture));
+        await Assert.That(metadata["SimplestGitTag"]).IsEqualTo("v1.2.3");
+        await Assert.That(metadata["SimplestGitRemoteUrl"]).IsEqualTo("https://example.invalid/repo.git");
     }
 
-    [Fact]
-    public void Metadata_UsesHashWithoutTags_AndOmitsRemoteByDefault()
+    [Test]
+    public async Task Metadata_UsesHashWithoutTags_AndOmitsRemoteByDefault()
     {
         InitializeRepository();
         Git("remote", "add", "origin", "https://example.invalid/repo.git");
 
         var metadata = ReadMetadata();
 
-        Assert.Equal(Git("rev-parse", "--short", "HEAD"), metadata["SimplestGitTag"]);
-        Assert.Equal("", metadata["SimplestGitRemoteUrl"]);
+        await Assert.That(metadata["SimplestGitTag"]).IsEqualTo(Git("rev-parse", "--short", "HEAD"));
+        await Assert.That(metadata["SimplestGitRemoteUrl"]).IsEqualTo("");
     }
 
-    [Fact]
-    public void Metadata_DescribesCommitsAfterTag_AndReportsDetachedHead()
+    [Test]
+    public async Task Metadata_DescribesCommitsAfterTag_AndReportsDetachedHead()
     {
         InitializeRepository();
         Git("tag", "v1.2.3");
@@ -57,14 +62,14 @@ public sealed class GitMetadataTests : IDisposable
 
         var metadata = ReadMetadata();
 
-        Assert.Equal("HEAD", metadata["SimplestGitBranch"]);
-        Assert.Equal("v1.2.3-1-g" + Git("rev-parse", "--short", "HEAD"), metadata["SimplestGitTag"]);
+        await Assert.That(metadata["SimplestGitBranch"]).IsEqualTo("HEAD");
+        await Assert.That(metadata["SimplestGitTag"]).IsEqualTo("v1.2.3-1-g" + Git("rev-parse", "--short", "HEAD"));
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void Metadata_ProjectInsideSubmodule_UsesSubmoduleRatherThanParent(bool detachedHead)
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Metadata_ProjectInsideSubmodule_UsesSubmoduleRatherThanParent(bool detachedHead)
     {
         InitializeRepository();
         Git("remote", "add", "origin", "https://example.invalid/parent.git");
@@ -91,26 +96,27 @@ public sealed class GitMetadataTests : IDisposable
         Git("add", "Metadata.proj");
         Commit();
         Git("-c", "tag.gpgSign=false", "tag", "parent-v9.0.0");
-        Assert.True(File.Exists(Path.Combine(submoduleDirectory, ".git")));
+        await Assert.That(File.Exists(Path.Combine(submoduleDirectory, ".git"))).IsTrue();
 
         var parentMetadata = ReadMetadata(publishRepositoryUrl: true);
         var submoduleMetadata = ReadMetadata(
             publishRepositoryUrl: true,
             projectPath: Path.Combine(submoduleDirectory, relativeProjectPath));
 
-        Assert.Equal(Git("rev-parse", "HEAD"), parentMetadata["SimplestGitCommitHash"]);
-        Assert.Equal("main", parentMetadata["SimplestGitBranch"]);
-        Assert.Equal("parent-v9.0.0", parentMetadata["SimplestGitTag"]);
-        Assert.Equal("https://example.invalid/parent.git", parentMetadata["SimplestGitRemoteUrl"]);
+        await Assert.That(parentMetadata["SimplestGitCommitHash"]).IsEqualTo(Git("rev-parse", "HEAD"));
+        await Assert.That(parentMetadata["SimplestGitBranch"]).IsEqualTo("main");
+        await Assert.That(parentMetadata["SimplestGitTag"]).IsEqualTo("parent-v9.0.0");
+        await Assert.That(parentMetadata["SimplestGitRemoteUrl"]).IsEqualTo("https://example.invalid/parent.git");
 
-        Assert.Equal(submoduleHash, submoduleMetadata["SimplestGitCommitHash"]);
-        Assert.Equal(detachedHead ? "HEAD" : "library", submoduleMetadata["SimplestGitBranch"]);
-        Assert.Equal(CommitDate, submoduleMetadata["SimplestGitCommitDate"]);
-        Assert.Equal("library-v1.2.3", submoduleMetadata["SimplestGitTag"]);
-        Assert.Equal("https://example.invalid/library.git", submoduleMetadata["SimplestGitRemoteUrl"]);
+        await Assert.That(submoduleMetadata["SimplestGitCommitHash"]).IsEqualTo(submoduleHash);
+        await Assert.That(submoduleMetadata["SimplestGitBranch"]).IsEqualTo(detachedHead ? "HEAD" : "library");
+        await Assert.That(DateTimeOffset.Parse(submoduleMetadata["SimplestGitCommitDate"], CultureInfo.InvariantCulture))
+            .IsEqualTo(DateTimeOffset.Parse(CommitDate, CultureInfo.InvariantCulture));
+        await Assert.That(submoduleMetadata["SimplestGitTag"]).IsEqualTo("library-v1.2.3");
+        await Assert.That(submoduleMetadata["SimplestGitRemoteUrl"]).IsEqualTo("https://example.invalid/library.git");
         foreach (var property in new[] { "SimplestGitCommitHash", "SimplestGitBranch", "SimplestGitTag", "SimplestGitRemoteUrl" })
         {
-            Assert.NotEqual(parentMetadata[property], submoduleMetadata[property]);
+            await Assert.That(submoduleMetadata[property]).IsNotEqualTo(parentMetadata[property]);
         }
 
         var submoduleProjectPath = Path.Combine(submoduleDirectory, relativeProjectPath);
@@ -125,28 +131,26 @@ public sealed class GitMetadataTests : IDisposable
                 projectPath: submoduleProjectPath,
                 workingDirectory: workingDirectory);
 
-            Assert.Equal(
-                parentMetadata.OrderBy(pair => pair.Key),
-                overriddenMetadata.OrderBy(pair => pair.Key));
+            await Assert.That(overriddenMetadata).IsEquivalentTo(parentMetadata);
         }
     }
 
-    [Fact]
-    public void Metadata_FailsForMissingWorkingDirectoryOverride_WithoutFallingBackToProjectDirectory()
+    [Test]
+    public async Task Metadata_FailsForMissingWorkingDirectoryOverride_WithoutFallingBackToProjectDirectory()
     {
         InitializeRepository();
         var result = Run(
             "dotnet", "msbuild", "Metadata.proj", "-target:GetGitMetadata", "-nologo", "-verbosity:quiet",
             "-property:SimplestGitWorkingDirectory=" + Path.Combine(directory, "Missing Directory"));
 
-        Assert.NotEqual(0, result.ExitCode);
-        Assert.Contains("MSB", result.Output + result.Error);
+        await Assert.That(result.ExitCode).IsNotEqualTo(0);
+        await Assert.That(result.Output + result.Error).Contains("MSB");
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void Metadata_FailsOutsideRepositoryOrWithoutCommits(bool initializeRepository)
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Metadata_FailsOutsideRepositoryOrWithoutCommits(bool initializeRepository)
     {
         if (initializeRepository)
         {
@@ -155,8 +159,8 @@ public sealed class GitMetadataTests : IDisposable
 
         var result = Run("dotnet", "msbuild", "Metadata.proj", "-target:GetGitMetadata", "-nologo", "-verbosity:quiet");
 
-        Assert.NotEqual(0, result.ExitCode);
-        Assert.Contains("MSB3073", result.Output + result.Error);
+        await Assert.That(result.ExitCode).IsNotEqualTo(0);
+        await Assert.That(result.Output + result.Error).Contains("MSB3073");
     }
 
     public void Dispose()
@@ -192,7 +196,10 @@ public sealed class GitMetadataTests : IDisposable
             "-property:PublishRepositoryUrl=" + publishRepositoryUrl.ToString().ToLowerInvariant(),
             "-property:SimplestGitWorkingDirectory=" + workingDirectory,
             "-getProperty:SimplestGitCommitHash,SimplestGitBranch,SimplestGitCommitDate,SimplestGitTag,SimplestGitRemoteUrl");
-        Assert.True(result.ExitCode == 0, result.Output + result.Error);
+        if (result.ExitCode != 0)
+        {
+            throw new InvalidOperationException("Reading Git metadata failed: " + result.Output + result.Error);
+        }
 
         using var json = JsonDocument.Parse(result.Output);
         return json.RootElement.GetProperty("Properties").EnumerateObject()
@@ -202,7 +209,10 @@ public sealed class GitMetadataTests : IDisposable
     private string Git(params string[] arguments)
     {
         var result = Run("git", arguments);
-        Assert.True(result.ExitCode == 0, result.Output + result.Error);
+        if (result.ExitCode != 0)
+        {
+            throw new InvalidOperationException("Git command failed: " + result.Output + result.Error);
+        }
         return result.Output.Trim();
     }
 

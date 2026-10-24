@@ -6,27 +6,27 @@ namespace SimplestGitSourceGenerator.Tests;
 
 public class GitInfoGeneratorTests
 {
-    [Fact]
-    public void SimplestGit_IsNotEmpty()
+    [Test]
+    public async Task SimplestGit_IsNotEmpty()
     {
-        Assert.NotEmpty(SimplestGit.CommitHash);
-        Assert.NotEmpty(SimplestGit.CommitDate);
-        Assert.NotEmpty(SimplestGit.Branch);
-        Assert.NotEmpty(SimplestGit.Tag);
-        Assert.NotEmpty(SimplestGit.RemoteUrl);
-        Assert.Matches("^[0-9a-f]{40}([0-9a-f]{24})?$", SimplestGit.CommitHash);
-        Assert.True(DateTimeOffset.TryParse(
+        await Assert.That(SimplestGit.CommitHash).IsNotEmpty();
+        await Assert.That(SimplestGit.CommitDate).IsNotEmpty();
+        await Assert.That(SimplestGit.Branch).IsNotEmpty();
+        await Assert.That(SimplestGit.Tag).IsNotEmpty();
+        await Assert.That(SimplestGit.RemoteUrl).IsNotEmpty();
+        await Assert.That(SimplestGit.CommitHash).Matches("^[0-9a-f]{40}([0-9a-f]{24})?$");
+        await Assert.That(DateTimeOffset.TryParse(
             SimplestGit.CommitDate,
             System.Globalization.CultureInfo.InvariantCulture,
             System.Globalization.DateTimeStyles.None,
-            out _));
+            out _)).IsTrue();
     }
 
-    [Theory]
-    [InlineData(LanguageVersion.CSharp7_3)]
-    [InlineData(LanguageVersion.CSharp9)]
-    [InlineData(LanguageVersion.CSharp12)]
-    public void Generator_EmitsExpectedConstants(LanguageVersion languageVersion)
+    [Test]
+    [Arguments(LanguageVersion.CSharp7_3)]
+    [Arguments(LanguageVersion.CSharp9)]
+    [Arguments(LanguageVersion.CSharp12)]
+    public async Task Generator_EmitsExpectedConstants(LanguageVersion languageVersion)
     {
         var values = new Dictionary<string, string>
         {
@@ -37,48 +37,48 @@ public class GitInfoGeneratorTests
             ["RemoteUrl"] = "https://example.invalid/repo.git"
         };
 
-        Assert.Equal(
-            values.OrderBy(pair => pair.Key),
-            GenerateConstants(values, languageVersion).OrderBy(pair => pair.Key));
+        var constants = await GenerateConstants(values, languageVersion);
+
+        await Assert.That(constants).IsEquivalentTo(values);
     }
 
-    [Fact]
-    public void Generator_UsesEmptyStringsForMissingProperties()
+    [Test]
+    public async Task Generator_UsesEmptyStringsForMissingProperties()
     {
-        var constants = GenerateConstants(new Dictionary<string, string>());
+        var constants = await GenerateConstants(new Dictionary<string, string>());
 
-        Assert.Equal(5, constants.Count);
-        Assert.All(constants.Values, value => Assert.Equal("", value));
-    }
-
-    public static TheoryData<string, string> LiteralValues
-    {
-        get
+        await Assert.That(constants).Count().IsEqualTo(5);
+        foreach (var value in constants.Values)
         {
-            var data = new TheoryData<string, string>();
-            foreach (var property in new[] { "CommitHash", "Branch", "CommitDate", "Tag", "RemoteUrl" })
-            {
-                foreach (var value in new[] { "", "quotes\"and\\slashes", "line\r\nbreak\t\0", "\u00e9\u2028\u2029" })
-                {
-                    data.Add(property, value);
-                }
-            }
-
-            return data;
+            await Assert.That(value).IsEqualTo("");
         }
     }
 
-    [Theory]
-    [MemberData(nameof(LiteralValues))]
-    public void Generator_PreservesStringLiteralValues(string property, string value)
+    public static IEnumerable<(string Property, string Value)> LiteralValues()
     {
-        var constants = GenerateConstants(new Dictionary<string, string> { [property] = value });
-
-        Assert.Equal(value, constants[property]);
-        Assert.All(constants.Where(pair => pair.Key != property), pair => Assert.Equal("", pair.Value));
+        foreach (var property in new[] { "CommitHash", "Branch", "CommitDate", "Tag", "RemoteUrl" })
+        {
+            foreach (var value in new[] { "", "quotes\"and\\slashes", "line\r\nbreak\t\0", "\u00e9\u2028\u2029" })
+            {
+                yield return (property, value);
+            }
+        }
     }
 
-    private static Dictionary<string, string> GenerateConstants(
+    [Test]
+    [MethodDataSource(nameof(LiteralValues))]
+    public async Task Generator_PreservesStringLiteralValues(string property, string value)
+    {
+        var constants = await GenerateConstants(new Dictionary<string, string> { [property] = value });
+
+        await Assert.That(constants[property]).IsEqualTo(value);
+        foreach (var pair in constants.Where(pair => pair.Key != property))
+        {
+            await Assert.That(pair.Value).IsEqualTo("");
+        }
+    }
+
+    private static async Task<Dictionary<string, string>> GenerateConstants(
         Dictionary<string, string> values,
         LanguageVersion languageVersion = LanguageVersion.CSharp7_3)
     {
@@ -100,23 +100,24 @@ public class GitInfoGeneratorTests
 
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
 
-        Assert.Empty(diagnostics);
-        Assert.Empty(output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
-        Assert.Single(driver.GetRunResult().GeneratedTrees);
+        await Assert.That(diagnostics).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(driver.GetRunResult().GeneratedTrees).Count().IsEqualTo(1);
 
-        var generatedType = output.GetTypeByMetadataName("SimplestGitSourceGenerator.SimplestGit");
-        Assert.NotNull(generatedType);
-        Assert.Equal(Accessibility.Internal, generatedType.DeclaredAccessibility);
-        Assert.True(generatedType.IsStatic);
+        var generatedType = await Assert.That(output.GetTypeByMetadataName("SimplestGitSourceGenerator.SimplestGit")).IsNotNull();
+        await Assert.That(generatedType.DeclaredAccessibility).IsEqualTo(Accessibility.Internal);
+        await Assert.That(generatedType.IsStatic).IsTrue();
 
-        return generatedType.GetMembers().OfType<IFieldSymbol>().ToDictionary(
-            field => field.Name,
-            field =>
-            {
-                Assert.True(field.IsConst);
-                Assert.Equal(Accessibility.Public, field.DeclaredAccessibility);
-                return Assert.IsType<string>(field.ConstantValue);
-            });
+        var constants = new Dictionary<string, string>();
+        foreach (var field in generatedType.GetMembers().OfType<IFieldSymbol>())
+        {
+            await Assert.That(field.IsConst).IsTrue();
+            await Assert.That(field.DeclaredAccessibility).IsEqualTo(Accessibility.Public);
+            var value = await Assert.That(field.ConstantValue).IsTypeOf<string>().And.IsNotNull();
+            constants.Add(field.Name, value);
+        }
+
+        return constants;
     }
 
     private sealed class TestOptionsProvider(Dictionary<string, string> values) : AnalyzerConfigOptionsProvider
