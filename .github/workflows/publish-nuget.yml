@@ -1,20 +1,23 @@
 name: Publish NuGet
 
 on:
-  release:
-    types: [ published ]
   workflow_dispatch:
 
 permissions:
-  contents: write # important for release description edit and asset upload
+  contents: write
   packages: write
 
 jobs:
   publish:
     name: Publish NuGet
-    uses: bigbang1112/workflows/.github/workflows/publish-nuget.yml@main
+    uses: bigbang1112/workflows/.github/workflows/publish-nuget-immutable.yml@main
     with:
-      dotnet-version: 10.x.x
-      project-path: Src/SimplestGitSourceGenerator
+      dotnet-version: 10.0.x
+      project-path: |
+        Src/SimplestGitSourceGenerator/SimplestGitSourceGenerator.csproj
+        Tests/SimplestGitSourceGenerator.Tests/SimplestGitSourceGenerator.Tests.csproj
+      test-path: Tests/SimplestGitSourceGenerator.Tests/SimplestGitSourceGenerator.Tests.csproj
+      pack-path: Src/SimplestGitSourceGenerator/SimplestGitSourceGenerator.csproj
+      main-project: SimplestGitSourceGenerator
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
