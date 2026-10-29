@@ -97,25 +97,3 @@ Before the source generator kicks in, several Git commands are called and stored
 These commands must complete with the exit code 0, otherwise, the build will not pass. All of that is done thanks to the `build/SimplestGitSourceGenerator.targets` file.
 
 This is a simpler alternative to SourceLink or GitInfo packages if you don't mind requiring the Git dependency.
-
-## Running tests
-
-Tests use TUnit and require the .NET 10 SDK. From the repository root, run:
-
-```sh
-dotnet test
-```
-
-To include code coverage:
-
-```sh
-dotnet test --coverage --coverage-output-format cobertura
-```
-
-## CI and releases
-
-Pull requests and pushes to `main` build and test the solution on Windows and Linux, and build and run the Docker sample.
-
-To publish, update the package version in `Src/SimplestGitSourceGenerator/SimplestGitSourceGenerator.csproj`, then run **Publish NuGet** from the GitHub Actions tab. It builds and tests the package, publishes it to NuGet.org and GitHub Packages, and creates a release for newly published packages. The repository needs a `NUGET_API_KEY` secret.
-
-The .NET CI and publishing workflows use [BigBang1112/workflows](https://github.com/BigBang1112/workflows).
